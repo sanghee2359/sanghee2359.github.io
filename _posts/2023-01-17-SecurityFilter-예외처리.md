@@ -1,12 +1,17 @@
-# Security Filter 예외처리하기 - JWT
 
+---
+layout: post
+title:  "Security Filter 예외처리하기 - JWT"
+date:   2023-01-17 02:24:29 +0900
+categories: Spring Security
+---
 Spring Security에서 토큰 기반 인증 중 예외가 발생한다면 어떤 일이 일어나는지, 어떻게 핸들링 해야하는지에 대해 알아보자.
 
 
 
 ###  이전에 알아야 할 지식
 
-> - 토큰 인증 방식 
+> - 토큰 인증 방식
 >
 >   인증받은 사용자에게 토큰을 발급해주고,
 >
@@ -16,7 +21,7 @@ Spring Security에서 토큰 기반 인증 중 예외가 발생한다면 어떤 
 
 > - Spring boot 예외처리 방식
 >
->   - `@ControllerAdvice`와 `@RestControllerAdvice`를 이용해서 컴포넌트를 생성하고 예외처리 메서드를 작성해놓으면 모든 클래스에 전역적으로 적용이 가능하다. 
+>   - `@ControllerAdvice`와 `@RestControllerAdvice`를 이용해서 컴포넌트를 생성하고 예외처리 메서드를 작성해놓으면 모든 클래스에 전역적으로 적용이 가능하다.
 >
 >   - `@ExceptionHandler`을 통해 특정 컨트롤러의 예외를 처리한다.
 
@@ -75,7 +80,7 @@ public class SecurityConfig  {
 
 ```
 
-> `addFilterBefore(Filter, beforeFilter)` 
+> `addFilterBefore(Filter, beforeFilter)`
 >
 > **beforeFilter**가 실행되기 이전에 **Filter**을 먼저 실행시키도록 설정하는 메소드이다.
 >
@@ -89,7 +94,7 @@ public class SecurityConfig  {
 > ```java
 > .exceptionHandling()
 >     // 인증 과정에서 예외가 발생할 경우 예외를 전달한다.
->                 .authenticationEntryPoint(new CustomAuthenticationEntryPointHandler()) 
+>                 .authenticationEntryPoint(new CustomAuthenticationEntryPointHandler())
 >     // 권한을 확인하는 과정에서 통과하지 못하는 예외가 발생하는 경우 예외를 전달한다.
 >                 .accessDeniedHandler(new CustomAccessDeniedHandler())
 
@@ -97,7 +102,7 @@ public class SecurityConfig  {
 
 
 
-메소드를 살펴보면 `인가 과정의 예외 상황`에서 CustomAccessDeniedHandler와 CustomAuthenticationEntryPointHandler 로 예외를 전달하고 있었다. 
+메소드를 살펴보면 `인가 과정의 예외 상황`에서 CustomAccessDeniedHandler와 CustomAuthenticationEntryPointHandler 로 예외를 전달하고 있었다.
 
 다음은 이러한 클래스를 작성하는 방법이다.
 
@@ -110,14 +115,14 @@ public class SecurityConfig  {
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
-        
+
         ErrorCode errorCode = ErrorCode.FORBIDDEN_REQUEST;
         JwtTokenFilter.setErrorResponse(response, errorCode);
     }
 }
 ```
 
->  `AccessDeniedHandler` 
+>  `AccessDeniedHandler`
 >
 > 액세스 권한이 없는 리소스에 접근할 경우 발생하는 예외
 >
@@ -165,7 +170,7 @@ public class CustomAuthenticationEntryPointHandler implements AuthenticationEntr
 @AllArgsConstructor
 @Getter
 public enum ErrorCode {
-    
+
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "잘못된 토큰입니다."),
     EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
     INVALID_PERMISSION(HttpStatus.UNAUTHORIZED, "사용자가 권한이 없습니다."),
@@ -181,7 +186,7 @@ public enum ErrorCode {
 JwtTokenFilter에 메소드를 추가로 작성해서 가독성을 높였다.
 
 ```java
-	/**
+	  /**
      * Security Chain 에서 발생하는 에러 응답 구성
      */
     public static void setErrorResponse(HttpServletResponse response, ErrorCode errorCode) throws IOException {
@@ -213,7 +218,7 @@ JwtTokenFilter에 메소드를 추가로 작성해서 가독성을 높였다.
 
 시큐리티를 처음 설정할 땐 낯설게 느껴지지만 핵심적인 클래스와 메서드를 짚어보면 큰 그림이 그려진다.
 
-어려운 내용을 만났을 때 잘 모르고 다음으로 넘어가는 것보다 이렇게 하나씩 정리해두면 
+어려운 내용을 만났을 때 잘 모르고 다음으로 넘어가는 것보다 이렇게 하나씩 정리해두면
 
 두고두고 이용해먹을 수 있겠다.
 
